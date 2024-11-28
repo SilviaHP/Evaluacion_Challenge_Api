@@ -69,9 +69,8 @@ La base del código del proyecto esta principalmente ubicado en la carpeta `src`
 El código de pruebas se encuentra ubicado en la carpeta `__tests__` . Esta carpeta se divide en los siguientes directorios:
 ```
 .
-├── __tests__/
-│   ├── core/
-│   │   ├── fetchPlanetUseCase.test.ts
-│   ├── handlers/
-│   │   ├── getData.test.ts
+├── __tests__
+│   ├── getData.test.ts
+│   ├── getHistory.test.ts
+│   ├── postData.test.ts
 ```
