@@ -1,0 +1,147 @@
+---
+openapi: 3.0.1
+info:
+  title: Starwars Challenge
+  version: v1
+servers:
+  - url: https://urlbase/dev/data
+    description: Ambiente de Desarrollo
+  - url: https://urlbase/uat/data
+    description: Ambiente de UAT
+tags:
+  - name: Almacenar
+    description: Registro de usuarios.
+  - name: Fusionados
+    description: Consulta las aspis externas swapi y unsplash, para crear información historica de un personaje de starwars.Aplica tecnica de manejo de cache registrado en tabla de DynamoDB.
+  - name: Historial
+    description: Consulta la información historica de las consultas por personaje de starwars. 
+paths:
+  "/urlbase/dev/almacenar":
+    post:
+      tags:
+      - Almacenar
+      summary: Registrar un usuario.     
+      description: 'Registra un usuario con éxito o actualiza si se envia el mismo email.'
+      requestBody:
+        description: ''
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/Usuario"
+      responses:
+        '201':
+          description: Usuario registrado con éxito.
+        '500':
+          description: Error al registrar el usuario.
+
+
+  "/urlbase/dev/fusionados":
+    get:
+      tags:
+      - Fusionados
+      summary: Registra información historica de las consultas de la información del personaje
+      description: 'Obtener información del personaje y su planeta de origen en las apis Swapi. Con el nombre del planeta se busca la primera coincidencia en Unsplash para obtener la url de la imagen. Con esta información se registra un historico del personaje'
+      parameters:
+      - name: characterName
+        in: query
+        description: 'Nombre del personaje a consultar. Ejemplo: Luke'
+        style: form
+        required: true        
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Datos creados con éxito.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HistoricoPersonaje"     
+        '400':
+          description: El parametro characterName es requerido.                    
+        '404':
+          description: El personaje no fue encontrado en Swapi. 
+        '500':
+          description: No se pudo obtener la imagen del planeta en Unsplash.
+          
+  "/urlbase/dev/historial":          
+    get:
+      tags:
+      - Historial
+      summary: Recuperar la información historica de las consultas de consultas por personaje de starwars.
+      description: 'Recuperar la información del historico del personaje en un arreglo de elementos "items". Permite el paginado.'
+      parameters:
+      - name: limit
+        in: query
+        description: 'Número de registros a mostrar. Si no se indica por defecto 10'
+        style: form
+        required: false        
+        schema:
+          type: number
+          format: int32
+      - name: lastEvaluatedKey
+        in: query
+        description: 'Atributo json de paginación. Ejemplo: {timestamp:{N:Valor-numero},id:{S:Valor-id}}'
+        style: form
+        required: false        
+        schema:
+          type: string
+        example:
+      responses:
+        '200':
+          description: Datos creados con éxito.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HistoricoPersonaje"             
+        '500':
+          description: Error al obtener la información de las consultas historicas de los personajes.         
+components:
+  schemas:
+    Usuario:
+      type: object
+      properties:
+        email:
+          type: string
+          nullable: false
+          example: "user1@gmail.com"
+        name:
+          type: string
+          nullable: false
+          example: "Ana"          
+        paternalSurname:
+          type: string
+          nullable: false     
+          example: "Perez"        
+        maternalSurname:
+          type: string
+          nullable: false
+          example: "Diaz"              
+        dateBirth:
+          type: string
+          nullable: false
+          example: "1980-01-30"              
+      additionalProperties: false
+    HistoricoPersonaje:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: false
+          example: "43adac63-de46-4639-a33f-bc3864d48829"
+        characterName:
+          type: string
+          nullable: false
+          example: "Luke Skywalker"          
+        planetName:
+          type: string
+          nullable: false     
+          example: "Tatooine" 
+        planetImageUrl:
+          type: string
+          nullable: false
+          example: "https://images.unsplash.com/photo-1568387380357-ba90334a6541"              
+        timestamp:
+          type: number
+          nullable: false
+          example: 1732788026146              
+      additionalProperties: false      
